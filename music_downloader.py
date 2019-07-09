@@ -2,6 +2,7 @@ from __future__ import unicode_literals
 import youtube_dl
 import re
 import os
+import threading
 from argparse import ArgumentParser
 
 # https://github.com/ytdl-org/youtube-dl/tree/3e4cedf9e8cd3157df2457df7274d0c842421945
@@ -22,6 +23,12 @@ def get_songs_from_file(fname):
     except Exception as e:
         print(e)
         return []
+
+def search_and_download_song(song):
+    song_url = find_youtube_url_from_song_name(song)
+    download_song(song_url,song)
+    print("\n")
+    return
     
 def main():
     parser = ArgumentParser()
@@ -30,9 +37,9 @@ def main():
     
     song_list = get_songs_from_file(args.input)
     for song in song_list:
-        song_url = find_youtube_url_from_song_name(song)
-        download_song(song_url,song)
-        print("\n")
+        t = threading.Thread(target=search_and_download_song,args=(song,))
+        t.start()
+        #t.join()
         
 # https://stackoverflow.com/questions/29069444/returning-the-urls-as-a-list-from-a-youtube-search-query
 def find_youtube_url_from_song_name(songname):
